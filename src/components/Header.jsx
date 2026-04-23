@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Header({ template, onShowExport, onNew }) {
+export default function Header({ template, shareUrl, onCopyShareUrl, onShowExport, onNew }) {
   return (
     <header className="header">
       <div className="header-left">
@@ -12,9 +12,19 @@ export default function Header({ template, onShowExport, onNew }) {
         <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
           {template?.name || 'Unbenannt'}
         </span>
+        {shareUrl && (
+          <span className="share-url-chip" title={shareUrl}>
+            {shareUrl}
+          </span>
+        )}
       </div>
       
       <div className="header-actions">
+        {shareUrl && (
+          <button className="btn btn-secondary" onClick={onCopyShareUrl}>
+            Share-Link kopieren
+          </button>
+        )}
         <button className="btn btn-ghost" onClick={onNew}>
           + Neues Projekt
         </button>

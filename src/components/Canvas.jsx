@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const Canvas = forwardRef(function Canvas({ 
   page, 
+  flipDirection = 1,
   selectedElement, 
   activeTool,
   onSelectElement,
@@ -108,12 +109,26 @@ const Canvas = forwardRef(function Canvas({
         <AnimatePresence mode="wait">
           <motion.div
             key={page.id}
-            initial={{ rotateY: -90, opacity: 0, x: 50 }}
-            animate={{ rotateY: 0, opacity: 1, x: 0 }}
-            exit={{ rotateY: 90, opacity: 0, x: -50 }}
-            transition={{ duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
-            style={{ transformOrigin: 'left center' }}
+            className="page-flip-wrapper"
+            initial={{
+              rotateY: flipDirection > 0 ? -140 : 140,
+              rotateX: 8,
+              opacity: 0,
+              x: flipDirection > 0 ? 36 : -36,
+              z: -80
+            }}
+            animate={{ rotateY: 0, rotateX: 0, opacity: 1, x: 0, z: 0 }}
+            exit={{
+              rotateY: flipDirection > 0 ? 125 : -125,
+              rotateX: -6,
+              opacity: 0,
+              x: flipDirection > 0 ? -24 : 24,
+              z: -40
+            }}
+            transition={{ duration: 0.65, ease: [0.2, 0.65, 0.25, 1] }}
+            style={{ transformOrigin: flipDirection > 0 ? 'left center' : 'right center' }}
           >
+            <div className="page-fold-shadow" />
             <div 
               ref={containerRef}
               className="canvas-page"

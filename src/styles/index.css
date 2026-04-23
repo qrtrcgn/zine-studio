@@ -65,6 +65,19 @@ body {
   gap: 16px;
 }
 
+.share-url-chip {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -293,6 +306,26 @@ body {
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.page-flip-wrapper {
+  position: relative;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.45));
+}
+
+.page-fold-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 18%),
+    linear-gradient(270deg, rgba(0, 0, 0, 0.12), transparent 20%);
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: multiply;
 }
 
 /* Page Elements */
@@ -728,6 +761,10 @@ body {
   .canvas-page {
     width: 300px;
     height: 424px;
+  }
+
+  .share-url-chip {
+    display: none;
   }
 }
 

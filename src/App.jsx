@@ -7,6 +7,18 @@ import Header from './components/Header'
 import ExportModal from './components/ExportModal'
 import WelcomeScreen from './components/WelcomeScreen'
 
+const SHARE_BASE_DOMAIN = import.meta.env.VITE_SHARE_BASE_DOMAIN || 'zines.local'
+
+function slugifyName(value = '') {
+  return value
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 40) || 'zine'
+}
+
 const DEFAULT_PAGE = {
   id: uuidv4(),
   elements: [],
@@ -41,18 +53,21 @@ function createNewPage() {
 export default function App() {
   const [template, setTemplate] = useState(null)
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
+  const [pageFlipDirection, setPageFlipDirection] = useState(1)
   const [selectedElement, setSelectedElement] = useState(null)
   const [activeTool, setActiveTool] = useState('select')
   const [showExport, setShowExport] = useState(false)
   const canvasRef = useRef(null)
 
   const currentPage = template?.pages[currentPageIndex]
+  const shareUrl = template?.shareSlug ? `https://${template.shareSlug}.${SHARE_BASE_DOMAIN}` : ''
 
   const handleCreate = (name) => {
     const newTemplate = {
       ...DEFAULT_TEMPLATE,
       name,
-      pages: [createNewPage()]
+      pages: [createNewPage()],
+      shareSlug: slugifyName(name)
     }
     setTemplate(newTemplate)
     setCurrentPageIndex(0)
@@ -64,6 +79,7 @@ export default function App() {
       ...template,
       pages: [...template.pages, createNewPage()]
     })
+    setPageFlipDirection(1)
     setCurrentPageIndex(template.pages.length)
   }
 
@@ -72,6 +88,22 @@ export default function App() {
     const newPages = template.pages.filter((_, i) => i !== index)
     setTemplate({ ...template, pages: newPages })
     setCurrentPageIndex(Math.max(0, currentPageIndex - 1))
+  }
+
+  const handlePageSelect = (index) => {
+    setPageFlipDirection(index > currentPageIndex ? 1 : -1)
+    setCurrentPageIndex(index)
+  }
+
+  const handleCopyShareUrl = async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      window.alert('Share-Link kopiert.')
+    } catch (error) {
+      console.error('Kopieren fehlgeschlagen:', error)
+      window.alert(`Bitte manuell kopieren: ${shareUrl}`)
+    }
   }
 
   const handleAddElement = (type, data = {}) => {
@@ -158,6 +190,8 @@ export default function App() {
     <div className="app">
       <Header 
         template={template}
+        shareUrl={shareUrl}
+        onCopyShareUrl={handleCopyShareUrl}
         onShowExport={() => setShowExport(true)}
         onNew={() => setTemplate(null)}
       />
@@ -170,13 +204,14 @@ export default function App() {
           onAddPage={handleAddPage}
           pages={template.pages}
           currentPageIndex={currentPageIndex}
-          onPageSelect={setCurrentPageIndex}
+          onPageSelect={handlePageSelect}
           onDeletePage={handleDeletePage}
         />
         
         <Canvas
           ref={canvasRef}
           page={currentPage}
+          flipDirection={pageFlipDirection}
           selectedElement={selectedElement}
           activeTool={activeTool}
           onSelectElement={setSelectedElement}
