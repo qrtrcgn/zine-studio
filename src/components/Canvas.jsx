@@ -126,6 +126,24 @@ const Canvas = forwardRef(function Canvas({
       initial: { opacity: 0, scale: 1.5, rotate: 5 },
       animate: { opacity: 1, scale: 1, rotate: 0, zIndex: 10, transition: { duration: 0.8, ease: "easeOut" } },
       exit: { opacity: 0, scale: 0.5, rotate: -5, zIndex: 1, transition: { duration: 0.8, ease: "easeIn" } }
+    },
+    peel: {
+      initial: { 
+        clipPath: flipDirection > 0 ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)',
+        opacity: 1,
+        zIndex: 10
+      },
+      animate: { 
+        clipPath: 'inset(0 0 0 0%)',
+        opacity: 1,
+        zIndex: 10,
+        transition: { duration: 3, ease: [0.4, 0, 0.2, 1] } 
+      },
+      exit: { 
+        opacity: 1,
+        zIndex: 1,
+        transition: { duration: 3 } 
+      }
     }
   }
 
@@ -165,7 +183,7 @@ const Canvas = forwardRef(function Canvas({
         <AnimatePresence initial={false}>
           <motion.div
             key={page.id}
-            className="page-flip-wrapper"
+            className={`page-flip-wrapper transition-${transitionType}`}
             initial={currentVariant.initial}
             animate={currentVariant.animate}
             exit={currentVariant.exit}
@@ -174,6 +192,28 @@ const Canvas = forwardRef(function Canvas({
               position: 'absolute'
             }}
           >
+            {transitionType === 'peel' && (
+              <motion.div
+                className="peel-curl"
+                initial={{ left: flipDirection > 0 ? '100%' : '-10%', x: flipDirection > 0 ? '-100%' : '0%' }}
+                animate={{ left: flipDirection > 0 ? '0%' : '100%', x: flipDirection > 0 ? '-100%' : '0%' }}
+                transition={{ duration: 3, ease: [0.4, 0, 0.2, 1] }}
+                style={{
+                  position: 'absolute',
+                  top: '-2%',
+                  bottom: '-2%',
+                  width: '80px',
+                  background: 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 20%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,1) 50%, rgba(220,220,220,1) 55%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0) 100%)',
+                  boxShadow: flipDirection > 0 ? '15px 0 30px rgba(0,0,0,0.3)' : '-15px 0 30px rgba(0,0,0,0.3)',
+                  zIndex: 25,
+                  pointerEvents: 'none',
+                  transformOrigin: 'center',
+                  borderRadius: '100% / 10%',
+                  rotate: flipDirection > 0 ? -2 : 2
+                }}
+              />
+            )}
+            
             {transitionType === 'roll' && (
               <>
                 <motion.div 
