@@ -1,9 +1,173 @@
 import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, usePresence } from 'framer-motion'
+
+const Page = ({ 
+  page, 
+  flipDirection, 
+  transitionType, 
+  currentVariant, 
+  selectedElement, 
+  onMouseDown, 
+  onUpdateElement,
+  containerRef 
+}) => {
+  const [isPresent] = usePresence()
+
+  return (
+    <motion.div
+      key={page.id}
+      className={`page-flip-wrapper transition-${transitionType}`}
+      initial={currentVariant.initial}
+      animate={currentVariant.animate}
+      exit={currentVariant.exit}
+      style={{ 
+        transformOrigin: flipDirection > 0 ? 'left center' : 'right center',
+        position: 'absolute'
+      }}
+    >
+      {transitionType === 'peel' && isPresent && (
+        <motion.div
+          className="peel-curl"
+          initial={{ left: flipDirection > 0 ? '100%' : '-10%', x: flipDirection > 0 ? '-100%' : '0%' }}
+          animate={{ left: flipDirection > 0 ? '0%' : '100%', x: flipDirection > 0 ? '-100%' : '0%' }}
+          transition={{ duration: 3, ease: [0.4, 0, 0.2, 1] }}
+          style={{
+            position: 'absolute',
+            top: '-2%',
+            bottom: '-2%',
+            width: '80px',
+            background: 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 20%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,1) 50%, rgba(220,220,220,1) 55%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0) 100%)',
+            boxShadow: flipDirection > 0 ? '15px 0 30px rgba(0,0,0,0.3)' : '-15px 0 30px rgba(0,0,0,0.3)',
+            zIndex: 25,
+            pointerEvents: 'none',
+            transformOrigin: 'center',
+            borderRadius: '100% / 10%',
+            rotate: flipDirection > 0 ? -2 : 2
+          }}
+        />
+      )}
+
+      {transitionType === 'roll' && (
+        <>
+          <motion.div 
+            className="page-roll-highlight"
+            initial={{ x: flipDirection > 0 ? '-100%' : '100%' }}
+            animate={{ x: '200%' }}
+            transition={{ duration: 2.5, ease: "linear" }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: '40%',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+              zIndex: 6,
+              pointerEvents: 'none'
+            }}
+          />
+          <motion.div 
+            className="page-roll-shadow"
+            initial={{ x: flipDirection > 0 ? '-80%' : '80%' }}
+            animate={{ x: '180%' }}
+            transition={{ duration: 2.5, ease: "linear" }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: '30%',
+              background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
+              zIndex: 4,
+              pointerEvents: 'none'
+            }}
+          />
+        </>
+      )}
+      <div className="page-fold-shadow" />
+      <div 
+        ref={containerRef}
+        className="canvas-page"
+        style={{ 
+          background: page.settings?.background || '#ffffff',
+          width: page.settings?.width || 420,
+          height: page.settings?.height || 594
+        }}
+      >
+        {page.elements.map(element => (
+          <div
+            key={element.id}
+            className={`page-element ${selectedElement === element.id ? 'selected' : ''}`}
+            data-locked={element.locked ? 'true' : 'false'}
+            style={{
+              position: 'absolute',
+              left: element.x,
+              top: element.y,
+              width: element.width,
+              height: element.height,
+              transform: `rotate(${element.rotation || 0}deg)`,
+              opacity: element.opacity || 1
+            }}
+            onMouseDown={(e) => onMouseDown(e, element.id)}
+          >
+            {element.type === 'text' && (
+              <div 
+                className="element-text"
+                style={{
+                  fontSize: element.styles?.fontSize || 16,
+                  fontFamily: element.styles?.fontFamily || 'Inter',
+                  color: element.styles?.color || '#1a1a1a',
+                  backgroundColor: element.styles?.backgroundColor || 'transparent',
+                  textAlign: element.styles?.textAlign || 'left',
+                  borderWidth: element.styles?.borderWidth,
+                  borderColor: element.styles?.borderColor,
+                  borderRadius: element.styles?.borderRadius,
+                  borderStyle: element.styles?.borderWidth > 0 ? 'solid' : 'none'
+                }}
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => onUpdateElement(element.id, { content: e.target.innerText })}
+              >
+                {element.content}
+              </div>
+            )}
+
+            {element.type === 'image' && (
+              <div className="element-image">
+                {element.content ? (
+                  <img src={element.content} alt="" />
+                ) : (
+                  <span style={{ color: '#999', fontSize: '0.8rem' }}>Bild einfügen</span>
+                )}
+              </div>
+            )}
+
+            {element.type === 'shape' && (
+              <div 
+                className="element-shape"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  background: element.styles?.backgroundColor || '#ff3366',
+                  borderRadius: element.styles?.borderRadius || 0
+                }}
+              />
+            )}
+
+            {element.type === 'line' && (
+              <div style={{
+                width: '100%',
+                height: Math.max(1, element.height || 2),
+                background: element.styles?.color || '#1a1a1a'
+              }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
 
 const Canvas = forwardRef(function Canvas({ 
   page, 
-  flipDirection = 1,
+...
   transitionType = 'roll',
   selectedElement, 
   activeTool,
@@ -140,9 +304,10 @@ const Canvas = forwardRef(function Canvas({
         transition: { duration: 3, ease: [0.4, 0, 0.2, 1] } 
       },
       exit: { 
+        clipPath: 'inset(0 0 0 0%)',
         opacity: 1,
         zIndex: 1,
-        transition: { duration: 3 } 
+        transition: { duration: 0 } // Stay put immediately as background
       }
     }
   }
@@ -181,154 +346,17 @@ const Canvas = forwardRef(function Canvas({
         style={{ perspective: 3000 }}
       >
         <AnimatePresence initial={false}>
-          <motion.div
+          <Page
             key={page.id}
-            className={`page-flip-wrapper transition-${transitionType}`}
-            initial={currentVariant.initial}
-            animate={currentVariant.animate}
-            exit={currentVariant.exit}
-            style={{ 
-              transformOrigin: flipDirection > 0 ? 'left center' : 'right center',
-              position: 'absolute'
-            }}
-          >
-            {transitionType === 'peel' && (
-              <motion.div
-                className="peel-curl"
-                initial={{ left: flipDirection > 0 ? '100%' : '-10%', x: flipDirection > 0 ? '-100%' : '0%' }}
-                animate={{ left: flipDirection > 0 ? '0%' : '100%', x: flipDirection > 0 ? '-100%' : '0%' }}
-                transition={{ duration: 3, ease: [0.4, 0, 0.2, 1] }}
-                style={{
-                  position: 'absolute',
-                  top: '-2%',
-                  bottom: '-2%',
-                  width: '80px',
-                  background: 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 20%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,1) 50%, rgba(220,220,220,1) 55%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0) 100%)',
-                  boxShadow: flipDirection > 0 ? '15px 0 30px rgba(0,0,0,0.3)' : '-15px 0 30px rgba(0,0,0,0.3)',
-                  zIndex: 25,
-                  pointerEvents: 'none',
-                  transformOrigin: 'center',
-                  borderRadius: '100% / 10%',
-                  rotate: flipDirection > 0 ? -2 : 2
-                }}
-              />
-            )}
-            
-            {transitionType === 'roll' && (
-              <>
-                <motion.div 
-                  className="page-roll-highlight"
-                  initial={{ x: flipDirection > 0 ? '-100%' : '100%' }}
-                  animate={{ x: '200%' }}
-                  transition={{ duration: 2.5, ease: "linear" }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    width: '40%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    zIndex: 6,
-                    pointerEvents: 'none'
-                  }}
-                />
-                <motion.div 
-                  className="page-roll-shadow"
-                  initial={{ x: flipDirection > 0 ? '-80%' : '80%' }}
-                  animate={{ x: '180%' }}
-                  transition={{ duration: 2.5, ease: "linear" }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    width: '30%',
-                    background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
-                    zIndex: 4,
-                    pointerEvents: 'none'
-                  }}
-                />
-              </>
-            )}
-            <div className="page-fold-shadow" />
-            <div 
-              ref={containerRef}
-              className="canvas-page"
-              style={{ 
-            background: page.settings?.background || '#ffffff',
-            width: page.settings?.width || 420,
-            height: page.settings?.height || 594
-          }}
-        >
-          {page.elements.map(element => (
-            <div
-              key={element.id}
-              className={`page-element ${selectedElement === element.id ? 'selected' : ''}`}
-              data-locked={element.locked ? 'true' : 'false'}
-              style={{
-                position: 'absolute',
-                left: element.x,
-                top: element.y,
-                width: element.width,
-                height: element.height,
-                transform: `rotate(${element.rotation || 0}deg)`,
-                opacity: element.opacity || 1
-              }}
-              onMouseDown={(e) => handleMouseDown(e, element.id)}
-            >
-              {element.type === 'text' && (
-                <div 
-                  className="element-text"
-                  style={{
-                    fontSize: element.styles?.fontSize || 16,
-                    fontFamily: element.styles?.fontFamily || 'Inter',
-                    color: element.styles?.color || '#1a1a1a',
-                    backgroundColor: element.styles?.backgroundColor || 'transparent',
-                    textAlign: element.styles?.textAlign || 'left',
-                    borderWidth: element.styles?.borderWidth,
-                    borderColor: element.styles?.borderColor,
-                    borderRadius: element.styles?.borderRadius,
-                    borderStyle: element.styles?.borderWidth > 0 ? 'solid' : 'none'
-                  }}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onBlur={(e) => onUpdateElement(element.id, { content: e.target.innerText })}
-                >
-                  {element.content}
-                </div>
-              )}
-              
-              {element.type === 'image' && (
-                <div className="element-image">
-                  {element.content ? (
-                    <img src={element.content} alt="" />
-                  ) : (
-                    <span style={{ color: '#999', fontSize: '0.8rem' }}>Bild einfügen</span>
-                  )}
-                </div>
-              )}
-              
-              {element.type === 'shape' && (
-                <div 
-                  className="element-shape"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    background: element.styles?.backgroundColor || '#ff3366',
-                    borderRadius: element.styles?.borderRadius || 0
-                  }}
-                />
-              )}
-              
-              {element.type === 'line' && (
-                <div style={{
-                  width: '100%',
-                  height: Math.max(1, element.height || 2),
-                  background: element.styles?.color || '#1a1a1a'
-                }} />
-              )}
-            </div>
-          ))}
-        </div>
-          </motion.div>
+            page={page}
+            flipDirection={flipDirection}
+            transitionType={transitionType}
+            currentVariant={currentVariant}
+            selectedElement={selectedElement}
+            onMouseDown={handleMouseDown}
+            onUpdateElement={onUpdateElement}
+            containerRef={containerRef}
+          />
         </AnimatePresence>
       </div>
     </div>
