@@ -16,7 +16,8 @@ export default function Sidebar({
   pages,
   currentPageIndex,
   onPageSelect,
-  onDeletePage
+  onDeletePage,
+  onApplyLayout
 }) {
   const handleToolClick = (toolId) => {
     if (toolId === 'select') {
@@ -50,21 +51,21 @@ export default function Sidebar({
       <div className="sidebar-section">
         <h3 className="sidebar-title">Layout</h3>
         <div className="sidebar-grid">
-          <div className="tool-item" onClick={() => onToolChange('text')}>
+          <div className="tool-item" onClick={() => onApplyLayout(1)}>
             <span className="tool-icon">1</span>
             <span className="tool-label">1 Spalte</span>
           </div>
-          <div className="tool-item" onClick={() => onToolChange('text')}>
+          <div className="tool-item" onClick={() => onApplyLayout(2)}>
             <span className="tool-icon">2</span>
             <span className="tool-label">2 Spalten</span>
           </div>
-          <div className="tool-item" onClick={() => onToolChange('text')}>
+          <div className="tool-item" onClick={() => onApplyLayout(3)}>
             <span className="tool-icon">3</span>
             <span className="tool-label">3 Spalten</span>
           </div>
-          <div className="tool-item" onClick={() => onToolChange('text')}>
-            <span className="tool-icon">#</span>
-            <span className="tool-label">Flexibel</span>
+          <div className="tool-item" onClick={() => onApplyLayout(4)}>
+            <span className="tool-icon">4</span>
+            <span className="tool-label">4 Spalten</span>
           </div>
         </div>
       </div>

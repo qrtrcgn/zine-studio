@@ -13,6 +13,9 @@ const FONTS = [
 export default function PropertiesPanel({ 
   element, 
   onUpdateElement,
+  onDuplicateElement,
+  onMoveLayer,
+  onAlignElement,
   pageSettings,
   onUpdatePageSettings,
   templateSettings,
@@ -124,6 +127,23 @@ export default function PropertiesPanel({
     <aside className="properties-panel">
       <div className="panel-section">
         <h3 className="panel-title">Position & Größe</h3>
+        <div className="toolbar-group" style={{ width: '100%', marginBottom: '12px' }}>
+          <button className="toolbar-btn" onClick={() => onDuplicateElement(element.id)} title="Duplizieren">
+            ++
+          </button>
+          <button className="toolbar-btn" onClick={() => onMoveLayer(element.id, 'down')} title="Eine Ebene runter">
+            v
+          </button>
+          <button className="toolbar-btn" onClick={() => onMoveLayer(element.id, 'up')} title="Eine Ebene hoch">
+            ^
+          </button>
+          <button className="toolbar-btn" onClick={() => onAlignElement(element.id, 'center-x')} title="Horizontal zentrieren">
+            |-|
+          </button>
+          <button className="toolbar-btn" onClick={() => onAlignElement(element.id, 'center-y')} title="Vertikal zentrieren">
+            =
+          </button>
+        </div>
         
         <div className="input-row">
           <div className="input-group">
@@ -343,6 +363,55 @@ export default function PropertiesPanel({
                 })}
               />
               <span className="slider-value">{element.styles?.borderRadius || 0}px</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {element.type === 'image' && (
+        <div className="panel-section">
+          <h3 className="panel-title">Bild</h3>
+          <div className="input-group">
+            <label className="input-label">Bild-URL</label>
+            <input
+              type="url"
+              className="input"
+              placeholder="https://..."
+              value={element.content || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: e.target.value })}
+            />
+          </div>
+        </div>
+      )}
+
+      {element.type === 'line' && (
+        <div className="panel-section">
+          <h3 className="panel-title">Linie</h3>
+          <div className="input-group">
+            <label className="input-label">Farbe</label>
+            <div className="color-picker">
+              {COLORS.slice(0, 10).map(color => (
+                <div
+                  key={color}
+                  className={`color-swatch ${element.styles?.color === color ? 'active' : ''}`}
+                  style={{ background: color }}
+                  onClick={() => onUpdateElement(element.id, { styles: { ...element.styles, color } })}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="input-group">
+            <label className="input-label">Strichstärke</label>
+            <div className="slider-container">
+              <input
+                type="range"
+                className="slider"
+                min="1"
+                max="20"
+                value={Math.max(1, Math.round(element.height || 2))}
+                onChange={(e) => onUpdateElement(element.id, { height: Number(e.target.value) })}
+              />
+              <span className="slider-value">{Math.max(1, Math.round(element.height || 2))}px</span>
             </div>
           </div>
         </div>

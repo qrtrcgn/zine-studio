@@ -255,6 +255,92 @@ export default function App() {
     commitTemplate({ ...template, pages: updatedPages })
   }
 
+  const handleDuplicateElement = (id) => {
+    if (!currentPage) return
+    const source = currentPage.elements.find((el) => el.id === id)
+    if (!source) return
+
+    const duplicate = {
+      ...source,
+      id: uuidv4(),
+      x: source.x + 16,
+      y: source.y + 16
+    }
+
+    const updatedPages = [...template.pages]
+    updatedPages[currentPageIndex] = {
+      ...currentPage,
+      elements: [...currentPage.elements, duplicate]
+    }
+    commitTemplate({ ...template, pages: updatedPages })
+    setSelectedElement(duplicate.id)
+  }
+
+  const handleMoveLayer = (id, direction) => {
+    if (!currentPage) return
+    const idx = currentPage.elements.findIndex((el) => el.id === id)
+    if (idx === -1) return
+    const target = direction === 'up' ? idx + 1 : idx - 1
+    if (target < 0 || target >= currentPage.elements.length) return
+
+    const nextElements = [...currentPage.elements]
+    const [item] = nextElements.splice(idx, 1)
+    nextElements.splice(target, 0, item)
+
+    const updatedPages = [...template.pages]
+    updatedPages[currentPageIndex] = { ...currentPage, elements: nextElements }
+    commitTemplate({ ...template, pages: updatedPages })
+  }
+
+  const handleAlignElement = (id, mode) => {
+    if (!currentPage) return
+    const target = currentPage.elements.find((el) => el.id === id)
+    if (!target) return
+
+    const pageWidth = currentPage.settings?.width || 420
+    const pageHeight = currentPage.settings?.height || 594
+    const updates = {}
+
+    if (mode === 'center-x') updates.x = Math.round((pageWidth - target.width) / 2)
+    if (mode === 'center-y') updates.y = Math.round((pageHeight - target.height) / 2)
+    handleUpdateElement(id, updates)
+  }
+
+  const handleApplyLayout = (columns) => {
+    if (!currentPage) return
+    const pageWidth = currentPage.settings?.width || 420
+    const pageHeight = currentPage.settings?.height || 594
+    const margin = currentPage.settings?.margin || 20
+    const gap = 16
+    const usableWidth = pageWidth - margin * 2 - gap * (columns - 1)
+    const colWidth = Math.max(24, Math.floor(usableWidth / columns))
+
+    const guides = Array.from({ length: columns }, (_, index) => ({
+      id: uuidv4(),
+      type: 'shape',
+      x: margin + index * (colWidth + gap),
+      y: margin,
+      width: colWidth,
+      height: pageHeight - margin * 2,
+      opacity: 0.15,
+      locked: true,
+      styles: {
+        backgroundColor: template.settings?.accentColor || '#ff3366',
+        borderRadius: 0,
+        borderWidth: 1,
+        borderColor: '#ffffff'
+      }
+    }))
+
+    const filtered = currentPage.elements.filter((el) => !el.locked)
+    const updatedPages = [...template.pages]
+    updatedPages[currentPageIndex] = {
+      ...currentPage,
+      elements: [...filtered, ...guides]
+    }
+    commitTemplate({ ...template, pages: updatedPages })
+  }
+
   const handleSaveProject = () => {
     if (!template) return
     const payload = {
@@ -475,6 +561,7 @@ export default function App() {
           currentPageIndex={currentPageIndex}
           onPageSelect={handlePageSelect}
           onDeletePage={handleDeletePage}
+          onApplyLayout={handleApplyLayout}
         />
         
         <Canvas
@@ -491,6 +578,9 @@ export default function App() {
         <PropertiesPanel
           element={currentPage?.elements.find(el => el.id === selectedElement)}
           onUpdateElement={handleUpdateElement}
+          onDuplicateElement={handleDuplicateElement}
+          onMoveLayer={handleMoveLayer}
+          onAlignElement={handleAlignElement}
           pageSettings={currentPage?.settings}
           onUpdatePageSettings={handleUpdatePageSettings}
           templateSettings={template.settings}

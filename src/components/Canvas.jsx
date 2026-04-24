@@ -33,6 +33,8 @@ const Canvas = forwardRef(function Canvas({
   const handleMouseDown = (e, elementId) => {
     e.stopPropagation()
     if (activeTool === 'select') {
+      const item = page?.elements.find((el) => el.id === elementId)
+      if (item?.locked) return
       onSelectElement(elementId)
       setDragging({ id: elementId, startX: e.clientX, startY: e.clientY })
     }
@@ -142,6 +144,7 @@ const Canvas = forwardRef(function Canvas({
             <div
               key={element.id}
               className={`page-element ${selectedElement === element.id ? 'selected' : ''}`}
+              data-locked={element.locked ? 'true' : 'false'}
               style={{
                 position: 'absolute',
                 left: element.x,
@@ -200,7 +203,7 @@ const Canvas = forwardRef(function Canvas({
               {element.type === 'line' && (
                 <div style={{
                   width: '100%',
-                  height: 2,
+                  height: Math.max(1, element.height || 2),
                   background: element.styles?.color || '#1a1a1a'
                 }} />
               )}

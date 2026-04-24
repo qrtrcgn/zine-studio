@@ -156,6 +156,11 @@ body {
   text-decoration: none;
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: var(--accent-primary);
   color: white;
@@ -374,6 +379,10 @@ body {
 .page-element.selected {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+.page-element[data-locked="true"] {
+  pointer-events: none;
 }
 
 .element-text {
