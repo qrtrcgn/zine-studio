@@ -71,6 +71,7 @@ export default function PropertiesPanel({
               onChange={(e) => onUpdateSettings({ transitionType: e.target.value })}
             >
               <option value="roll">Seiten-Roll (Steil)</option>
+              <option value="peel">Abrollen (Peel)</option>
               <option value="flip">Klassischer Flip</option>
               <option value="slide">Gleiten (Slide)</option>
               <option value="fade">Überblenden (Fade)</option>
