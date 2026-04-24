@@ -108,27 +108,52 @@ const Canvas = forwardRef(function Canvas({
         onClick={handleCanvasClick}
         style={{ perspective: 2000 }}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false}>
           <motion.div
             key={page.id}
             className="page-flip-wrapper"
             initial={{
-              rotateY: flipDirection > 0 ? -140 : 140,
-              rotateX: 8,
+              rotateY: flipDirection > 0 ? -160 : 160,
+              rotateX: flipDirection > 0 ? 15 : -15,
+              skewY: flipDirection > 0 ? -20 : 20,
               opacity: 0,
-              x: flipDirection > 0 ? 36 : -36,
-              z: -80
+              x: flipDirection > 0 ? 150 : -150,
+              z: -500,
+              scale: 0.8
             }}
-            animate={{ rotateY: 0, rotateX: 0, opacity: 1, x: 0, z: 0 }}
+            animate={{ 
+              rotateY: 0, 
+              rotateX: 0,
+              rotateZ: 0,
+              skewY: 0, 
+              opacity: 1, 
+              x: 0, 
+              z: 0,
+              scale: 1,
+              zIndex: 10,
+              transition: {
+                duration: 2.2,
+                ease: [0.22, 1, 0.36, 1]
+              }
+            }}
             exit={{
-              rotateY: flipDirection > 0 ? 125 : -125,
-              rotateX: -6,
+              rotateY: flipDirection > 0 ? 160 : -160,
+              rotateX: flipDirection > 0 ? -15 : 15,
+              skewY: flipDirection > 0 ? 20 : -20,
               opacity: 0,
-              x: flipDirection > 0 ? -24 : 24,
-              z: -40
+              x: flipDirection > 0 ? -150 : 150,
+              z: -500,
+              scale: 0.8,
+              zIndex: 1,
+              transition: {
+                duration: 1.8,
+                ease: [0.22, 1, 0.36, 1]
+              }
             }}
-            transition={{ duration: 0.65, ease: [0.2, 0.65, 0.25, 1] }}
-            style={{ transformOrigin: flipDirection > 0 ? 'left center' : 'right center' }}
+            style={{ 
+              transformOrigin: flipDirection > 0 ? 'left center' : 'right center',
+              position: 'absolute'
+            }}
           >
             <div className="page-fold-shadow" />
             <div 
