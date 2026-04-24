@@ -1,6 +1,18 @@
 import React from 'react'
 
-export default function Header({ template, shareUrl, onCopyShareUrl, onShowExport, onNew }) {
+export default function Header({
+  template,
+  shareUrl,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onImportProject,
+  onSaveProject,
+  onCopyShareUrl,
+  onShowExport,
+  onNew
+}) {
   return (
     <header className="header">
       <div className="header-left">
@@ -20,6 +32,19 @@ export default function Header({ template, shareUrl, onCopyShareUrl, onShowExpor
       </div>
       
       <div className="header-actions">
+        <label className="btn btn-secondary">
+          Projekt laden
+          <input type="file" accept=".json,.zine.json" style={{ display: 'none' }} onChange={onImportProject} />
+        </label>
+        <button className="btn btn-primary" onClick={onSaveProject}>
+          Projekt speichern
+        </button>
+        <button className="btn btn-ghost" onClick={onUndo} disabled={!canUndo}>
+          Undo
+        </button>
+        <button className="btn btn-ghost" onClick={onRedo} disabled={!canRedo}>
+          Redo
+        </button>
         {shareUrl && (
           <button className="btn btn-secondary" onClick={onCopyShareUrl}>
             Share-Link kopieren
@@ -30,9 +55,6 @@ export default function Header({ template, shareUrl, onCopyShareUrl, onShowExpor
         </button>
         <button className="btn btn-secondary" onClick={onShowExport}>
           Exportieren
-        </button>
-        <button className="btn btn-primary">
-          Speichern
         </button>
       </div>
     </header>

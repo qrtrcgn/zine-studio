@@ -46,6 +46,42 @@ body {
   min-height: 100vh;
 }
 
+.viewer-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.viewer-header {
+  width: min(920px, 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.viewer-book {
+  width: min(920px, 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.viewer-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.viewer-empty {
+  max-width: 560px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 /* Header */
 .header {
   display: flex;
