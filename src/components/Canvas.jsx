@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const Canvas = forwardRef(function Canvas({ 
   page, 
   flipDirection = 1,
+  transitionType = 'roll',
   selectedElement, 
   activeTool,
   onSelectElement,
@@ -79,6 +80,57 @@ const Canvas = forwardRef(function Canvas({
 
   if (!page) return null
 
+  const variants = {
+    roll: {
+      initial: {
+        rotateY: flipDirection > 0 ? -170 : 170,
+        rotateX: flipDirection > 0 ? 20 : -20,
+        skewY: flipDirection > 0 ? -25 : 25,
+        opacity: 0,
+        x: flipDirection > 0 ? 200 : -200,
+        z: -800,
+        scale: 0.7
+      },
+      animate: {
+        rotateY: 0, rotateX: 0, rotateZ: 0, skewY: 0, opacity: 1, x: 0, z: 0, scale: 1, zIndex: 10,
+        transition: { duration: 2.5, ease: [0.16, 1, 0.3, 1] }
+      },
+      exit: {
+        rotateY: flipDirection > 0 ? 170 : -170,
+        rotateX: flipDirection > 0 ? -20 : 20,
+        skewY: flipDirection > 0 ? 25 : -25,
+        opacity: 0,
+        x: flipDirection > 0 ? -200 : 200,
+        z: -800,
+        scale: 0.7,
+        zIndex: 1,
+        transition: { duration: 2.0, ease: [0.16, 1, 0.3, 1] }
+      }
+    },
+    flip: {
+      initial: { rotateY: flipDirection > 0 ? -120 : 120, opacity: 0, x: flipDirection > 0 ? 40 : -40, z: -200 },
+      animate: { rotateY: 0, opacity: 1, x: 0, z: 0, zIndex: 10, transition: { duration: 0.8, ease: "easeOut" } },
+      exit: { rotateY: flipDirection > 0 ? 120 : -120, opacity: 0, x: flipDirection > 0 ? -40 : 40, z: -200, zIndex: 1, transition: { duration: 0.8, ease: "easeIn" } }
+    },
+    slide: {
+      initial: { x: flipDirection > 0 ? '100%' : '-100%', opacity: 0 },
+      animate: { x: 0, opacity: 1, zIndex: 10, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } },
+      exit: { x: flipDirection > 0 ? '-100%' : '100%', opacity: 0, zIndex: 1, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } }
+    },
+    fade: {
+      initial: { opacity: 0, scale: 0.98 },
+      animate: { opacity: 1, scale: 1, zIndex: 10, transition: { duration: 0.5 } },
+      exit: { opacity: 0, scale: 1.02, zIndex: 1, transition: { duration: 0.5 } }
+    },
+    zoom: {
+      initial: { opacity: 0, scale: 1.5, rotate: 5 },
+      animate: { opacity: 1, scale: 1, rotate: 0, zIndex: 10, transition: { duration: 0.8, ease: "easeOut" } },
+      exit: { opacity: 0, scale: 0.5, rotate: -5, zIndex: 1, transition: { duration: 0.8, ease: "easeIn" } }
+    }
+  }
+
+  const currentVariant = variants[transitionType] || variants.roll
+
   return (
     <div className={`canvas-container ${activeTool === 'view' ? 'viewer-mode' : ''}`}>
       {activeTool !== 'view' && (
@@ -114,79 +166,48 @@ const Canvas = forwardRef(function Canvas({
           <motion.div
             key={page.id}
             className="page-flip-wrapper"
-            initial={{
-              rotateY: flipDirection > 0 ? -170 : 170,
-              rotateX: flipDirection > 0 ? 20 : -20,
-              skewY: flipDirection > 0 ? -25 : 25,
-              opacity: 0,
-              x: flipDirection > 0 ? 200 : -200,
-              z: -800,
-              scale: 0.7
-            }}
-            animate={{ 
-              rotateY: 0, 
-              rotateX: 0,
-              rotateZ: 0,
-              skewY: 0, 
-              opacity: 1, 
-              x: 0, 
-              z: 0,
-              scale: 1,
-              zIndex: 10,
-              transition: {
-                duration: 2.5,
-                ease: [0.16, 1, 0.3, 1] // OutExpo variant for a more physical feel
-              }
-            }}
-            exit={{
-              rotateY: flipDirection > 0 ? 170 : -170,
-              rotateX: flipDirection > 0 ? -20 : 20,
-              skewY: flipDirection > 0 ? 25 : -25,
-              opacity: 0,
-              x: flipDirection > 0 ? -200 : 200,
-              z: -800,
-              scale: 0.7,
-              zIndex: 1,
-              transition: {
-                duration: 2.0,
-                ease: [0.16, 1, 0.3, 1]
-              }
-            }}
+            initial={currentVariant.initial}
+            animate={currentVariant.animate}
+            exit={currentVariant.exit}
             style={{ 
               transformOrigin: flipDirection > 0 ? 'left center' : 'right center',
               position: 'absolute'
             }}
           >
-            <motion.div 
-              className="page-roll-highlight"
-              initial={{ x: flipDirection > 0 ? '-100%' : '100%' }}
-              animate={{ x: '200%' }}
-              transition={{ duration: 2.5, ease: "linear" }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                width: '40%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                zIndex: 6,
-                pointerEvents: 'none'
-              }}
-            />
-            <motion.div 
-              className="page-roll-shadow"
-              initial={{ x: flipDirection > 0 ? '-80%' : '80%' }}
-              animate={{ x: '180%' }}
-              transition={{ duration: 2.5, ease: "linear" }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                width: '30%',
-                background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
-                zIndex: 4,
-                pointerEvents: 'none'
-              }}
-            />
+            {transitionType === 'roll' && (
+              <>
+                <motion.div 
+                  className="page-roll-highlight"
+                  initial={{ x: flipDirection > 0 ? '-100%' : '100%' }}
+                  animate={{ x: '200%' }}
+                  transition={{ duration: 2.5, ease: "linear" }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    width: '40%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    zIndex: 6,
+                    pointerEvents: 'none'
+                  }}
+                />
+                <motion.div 
+                  className="page-roll-shadow"
+                  initial={{ x: flipDirection > 0 ? '-80%' : '80%' }}
+                  animate={{ x: '180%' }}
+                  transition={{ duration: 2.5, ease: "linear" }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    width: '30%',
+                    background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
+                    zIndex: 4,
+                    pointerEvents: 'none'
+                  }}
+                />
+              </>
+            )}
             <div className="page-fold-shadow" />
             <div 
               ref={containerRef}

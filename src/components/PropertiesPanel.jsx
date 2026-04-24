@@ -61,6 +61,25 @@ export default function PropertiesPanel({
         </div>
         
         <div className="panel-section">
+          <h3 className="panel-title">Animation</h3>
+          
+          <div className="input-group">
+            <label className="input-label">Umschlag-Effekt</label>
+            <select 
+              className="input"
+              value={templateSettings?.transitionType || 'roll'}
+              onChange={(e) => onUpdateSettings({ transitionType: e.target.value })}
+            >
+              <option value="roll">Seiten-Roll (Steil)</option>
+              <option value="flip">Klassischer Flip</option>
+              <option value="slide">Gleiten (Slide)</option>
+              <option value="fade">Überblenden (Fade)</option>
+              <option value="zoom">Zoom & Pan</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="panel-section">
           <h3 className="panel-title">Design</h3>
           
           <div className="input-group">

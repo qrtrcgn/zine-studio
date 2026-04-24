@@ -489,6 +489,7 @@ export default function App() {
               <Canvas
                 page={viewerPage}
                 flipDirection={pageFlipDirection}
+                transitionType={template.settings?.transitionType}
                 selectedElement={null}
                 activeTool="view"
                 onSelectElement={() => {}}
@@ -568,6 +569,7 @@ export default function App() {
           ref={canvasRef}
           page={currentPage}
           flipDirection={pageFlipDirection}
+          transitionType={template.settings?.transitionType}
           selectedElement={selectedElement}
           activeTool={activeTool}
           onSelectElement={setSelectedElement}
