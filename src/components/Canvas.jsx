@@ -167,7 +167,8 @@ const Page = ({
 
 const Canvas = forwardRef(function Canvas({ 
   page, 
-...
+  backgroundPage = null,
+  flipDirection = 1,
   transitionType = 'roll',
   selectedElement, 
   activeTool,
@@ -302,9 +303,9 @@ const Canvas = forwardRef(function Canvas({
       },
       exit: { 
         clipPath: 'inset(0 0 0 0%)',
-        opacity: 1,
+        opacity: 0, // Fade out the old page once unmounted
         zIndex: 1,
-        transition: { duration: 3 } // Stay visible while the new page rolls in
+        transition: { duration: 0.5 } 
       }
     }
   }
@@ -342,6 +343,67 @@ const Canvas = forwardRef(function Canvas({
         onClick={handleCanvasClick}
         style={{ perspective: 3000 }}
       >
+        {backgroundPage && (
+          <div 
+            key={`bg-${backgroundPage.id}`}
+            className="page-flip-wrapper static-background"
+            style={{ 
+              position: 'absolute',
+              zIndex: 1,
+              opacity: 1
+            }}
+          >
+            <div className="page-fold-shadow" />
+            <div 
+              className="canvas-page"
+              style={{ 
+                background: backgroundPage.settings?.background || '#ffffff',
+                width: backgroundPage.settings?.width || 420,
+                height: backgroundPage.settings?.height || 594
+              }}
+            >
+              {backgroundPage.elements.map(element => (
+                <div
+                  key={element.id}
+                  className="page-element"
+                  style={{
+                    position: 'absolute',
+                    left: element.x,
+                    top: element.y,
+                    width: element.width,
+                    height: element.height,
+                    transform: `rotate(${element.rotation || 0}deg)`,
+                    opacity: element.opacity || 1
+                  }}
+                >
+                  {element.type === 'text' && (
+                    <div 
+                      className="element-text"
+                      style={{
+                        fontSize: element.styles?.fontSize || 16,
+                        fontFamily: element.styles?.fontFamily || 'Inter',
+                        color: element.styles?.color || '#1a1a1a',
+                        backgroundColor: element.styles?.backgroundColor || 'transparent',
+                        textAlign: element.styles?.textAlign || 'left'
+                      }}
+                    >
+                      {element.content}
+                    </div>
+                  )}
+                  {element.type === 'shape' && (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      background: element.styles?.backgroundColor || '#ff3366',
+                      borderRadius: element.styles?.borderRadius || 0
+                    }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <AnimatePresence initial={false}>
           <Page
             key={page.id}

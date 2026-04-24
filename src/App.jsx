@@ -96,6 +96,7 @@ export default function App() {
   const [route, setRoute] = useState(() => parseRoute(window.location.pathname))
   const [template, setTemplate] = useState(null)
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
+  const [previousPageIndex, setPreviousPageIndex] = useState(null)
   const [pageFlipDirection, setPageFlipDirection] = useState(1)
   const [selectedElement, setSelectedElement] = useState(null)
   const [activeTool, setActiveTool] = useState('select')
@@ -164,6 +165,7 @@ export default function App() {
   }
 
   const handlePageSelect = (index) => {
+    setPreviousPageIndex(currentPageIndex)
     setPageFlipDirection(index > currentPageIndex ? 1 : -1)
     setCurrentPageIndex(index)
   }
@@ -488,6 +490,7 @@ export default function App() {
             <div className="viewer-book">
               <Canvas
                 page={viewerPage}
+                backgroundPage={previousPageIndex !== null ? template.pages[previousPageIndex] : null}
                 flipDirection={pageFlipDirection}
                 transitionType={template.settings?.transitionType}
                 selectedElement={null}
@@ -502,6 +505,7 @@ export default function App() {
                 className="btn btn-secondary"
                 onClick={() => {
                   const nextIndex = Math.max(0, currentPageIndex - 1)
+                  setPreviousPageIndex(currentPageIndex)
                   setPageFlipDirection(-1)
                   setCurrentPageIndex(nextIndex)
                 }}
@@ -513,6 +517,7 @@ export default function App() {
                 className="btn btn-primary"
                 onClick={() => {
                   const nextIndex = Math.min(template.pages.length - 1, currentPageIndex + 1)
+                  setPreviousPageIndex(currentPageIndex)
                   setPageFlipDirection(1)
                   setCurrentPageIndex(nextIndex)
                 }}
@@ -568,6 +573,7 @@ export default function App() {
         <Canvas
           ref={canvasRef}
           page={currentPage}
+          backgroundPage={previousPageIndex !== null ? template.pages[previousPageIndex] : null}
           flipDirection={pageFlipDirection}
           transitionType={template.settings?.transitionType}
           selectedElement={selectedElement}
