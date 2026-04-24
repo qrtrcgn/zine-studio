@@ -80,25 +80,27 @@ const Canvas = forwardRef(function Canvas({
   if (!page) return null
 
   return (
-    <div className="canvas-container">
-      <div className="canvas-toolbar">
-        <div className="toolbar-group">
-          <button className={`toolbar-btn ${activeTool === 'select' ? 'active' : ''}`}>
-            ⬚
-          </button>
+    <div className={`canvas-container ${activeTool === 'view' ? 'viewer-mode' : ''}`}>
+      {activeTool !== 'view' && (
+        <div className="canvas-toolbar">
+          <div className="toolbar-group">
+            <button className={`toolbar-btn ${activeTool === 'select' ? 'active' : ''}`}>
+              ⬚
+            </button>
+          </div>
+          <div className="toolbar-divider" />
+          <div className="toolbar-group">
+            <button className="toolbar-btn">A-</button>
+            <button className="toolbar-btn">A+</button>
+          </div>
+          <div className="toolbar-divider" />
+          <div className="toolbar-group">
+            <button className="toolbar-btn">≡</button>
+            <button className="toolbar-btn">☰</button>
+            <button className="toolbar-btn">::</button>
+          </div>
         </div>
-        <div className="toolbar-divider" />
-        <div className="toolbar-group">
-          <button className="toolbar-btn">A-</button>
-          <button className="toolbar-btn">A+</button>
-        </div>
-        <div className="toolbar-divider" />
-        <div className="toolbar-group">
-          <button className="toolbar-btn">≡</button>
-          <button className="toolbar-btn">☰</button>
-          <button className="toolbar-btn">::</button>
-        </div>
-      </div>
+      )}
       
       <div 
         className="canvas-viewport"
@@ -106,20 +108,20 @@ const Canvas = forwardRef(function Canvas({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onClick={handleCanvasClick}
-        style={{ perspective: 2000 }}
+        style={{ perspective: 3000 }}
       >
         <AnimatePresence initial={false}>
           <motion.div
             key={page.id}
             className="page-flip-wrapper"
             initial={{
-              rotateY: flipDirection > 0 ? -160 : 160,
-              rotateX: flipDirection > 0 ? 15 : -15,
-              skewY: flipDirection > 0 ? -20 : 20,
+              rotateY: flipDirection > 0 ? -170 : 170,
+              rotateX: flipDirection > 0 ? 20 : -20,
+              skewY: flipDirection > 0 ? -25 : 25,
               opacity: 0,
-              x: flipDirection > 0 ? 150 : -150,
-              z: -500,
-              scale: 0.8
+              x: flipDirection > 0 ? 200 : -200,
+              z: -800,
+              scale: 0.7
             }}
             animate={{ 
               rotateY: 0, 
@@ -132,22 +134,22 @@ const Canvas = forwardRef(function Canvas({
               scale: 1,
               zIndex: 10,
               transition: {
-                duration: 2.2,
-                ease: [0.22, 1, 0.36, 1]
+                duration: 2.5,
+                ease: [0.16, 1, 0.3, 1] // OutExpo variant for a more physical feel
               }
             }}
             exit={{
-              rotateY: flipDirection > 0 ? 160 : -160,
-              rotateX: flipDirection > 0 ? -15 : 15,
-              skewY: flipDirection > 0 ? 20 : -20,
+              rotateY: flipDirection > 0 ? 170 : -170,
+              rotateX: flipDirection > 0 ? -20 : 20,
+              skewY: flipDirection > 0 ? 25 : -25,
               opacity: 0,
-              x: flipDirection > 0 ? -150 : 150,
-              z: -500,
-              scale: 0.8,
+              x: flipDirection > 0 ? -200 : 200,
+              z: -800,
+              scale: 0.7,
               zIndex: 1,
               transition: {
-                duration: 1.8,
-                ease: [0.22, 1, 0.36, 1]
+                duration: 2.0,
+                ease: [0.16, 1, 0.3, 1]
               }
             }}
             style={{ 
@@ -155,6 +157,36 @@ const Canvas = forwardRef(function Canvas({
               position: 'absolute'
             }}
           >
+            <motion.div 
+              className="page-roll-highlight"
+              initial={{ x: flipDirection > 0 ? '-100%' : '100%' }}
+              animate={{ x: '200%' }}
+              transition={{ duration: 2.5, ease: "linear" }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '40%',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                zIndex: 6,
+                pointerEvents: 'none'
+              }}
+            />
+            <motion.div 
+              className="page-roll-shadow"
+              initial={{ x: flipDirection > 0 ? '-80%' : '80%' }}
+              animate={{ x: '180%' }}
+              transition={{ duration: 2.5, ease: "linear" }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '30%',
+                background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
+                zIndex: 4,
+                pointerEvents: 'none'
+              }}
+            />
             <div className="page-fold-shadow" />
             <div 
               ref={containerRef}
