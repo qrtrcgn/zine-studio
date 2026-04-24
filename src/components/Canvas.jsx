@@ -260,15 +260,12 @@ const Canvas = forwardRef(function Canvas({
         transition: { duration: 2.5, ease: [0.16, 1, 0.3, 1] }
       },
       exit: {
-        rotateY: flipDirection > 0 ? 170 : -170,
-        rotateX: flipDirection > 0 ? -20 : 20,
-        skewY: flipDirection > 0 ? 25 : -25,
-        opacity: 0,
-        x: flipDirection > 0 ? -200 : 200,
-        z: -800,
-        scale: 0.7,
+        rotateY: 0,
+        rotateX: 0,
+        skewY: 0,
+        opacity: 1,
         zIndex: 1,
-        transition: { duration: 2.0, ease: [0.16, 1, 0.3, 1] }
+        transition: { duration: 2.5 }
       }
     },
     flip: {
@@ -307,7 +304,7 @@ const Canvas = forwardRef(function Canvas({
         clipPath: 'inset(0 0 0 0%)',
         opacity: 1,
         zIndex: 1,
-        transition: { duration: 0 } // Stay put immediately as background
+        transition: { duration: 3 } // Stay visible while the new page rolls in
       }
     }
   }
